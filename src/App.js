@@ -30,7 +30,7 @@ const App = () => {
     },
   ];
 
-  const [tasks, setTask]=useState(TASKS);
+  const [tasks, setTask] = useState(TASKS);
 
   const updateTasks = (taskId) => {
     const newTasks = [...tasks];
@@ -43,7 +43,7 @@ const App = () => {
     setTask(newTasks);
   };
 
-  const deleteTasks=(taskId)=>{
+  const deleteTasks = (taskId) => {
     const newTasks = [];
     for (const task of tasks) {
       if (task.id !== taskId) {
@@ -60,10 +60,11 @@ const App = () => {
       </header>
       <main>
         <div>
-          <TaskList 
-          tasks={tasks} 
-          updateTasks={updateTasks}
-          deleteTasks={deleteTasks}></TaskList>
+          <TaskList
+            tasks={tasks}
+            updateTasks={updateTasks}
+            deleteTasks={deleteTasks}
+          ></TaskList>
         </div>
       </main>
     </div>
