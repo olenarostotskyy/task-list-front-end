@@ -1,56 +1,86 @@
 import React from 'react';
 import TaskList from './components/TaskList.js';
+import TaskForm from './components/TaskForm.js';
 import './App.css';
-import { useState } from 'react';
-
-// const TASKS = [
-//   {
-//     id: 1,
-//     title: 'Mow the lawn',
-//     isComplete: false,
-//   },
-//   {
-//     id: 2,
-//     title: 'Cook Pasta',
-//     isComplete: true,
-//   },
-// ];
+import { useEffect,useState } from 'react';
+import axios from 'axios';
 
 const App = () => {
-  const TASKS = [
-    {
-      id: 1,
-      title: 'Mow the lawn',
-      isComplete: false,
-    },
-    {
-      id: 2,
-      title: 'Cook Pasta',
-      isComplete: true,
-    },
-  ];
+  const [tasks, setTask]=useState([]);
 
-  const [tasks, setTask]=useState(TASKS);
+  useEffect(() => {
+    getTaskFromAPI();
+  }, []);
 
+  const getTaskFromAPI = () => {
+    axios
+    .get('https://task-list-api-c17.herokuapp.com/tasks')
+    .then((response) => {
+      setTask(response.data)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+  }
+  
   const updateTasks = (taskId) => {
+    let targetTask;
     const newTasks = [...tasks];
     for (const task of newTasks) {
-      console.log(task);
       if (task.id === taskId) {
         task.isComplete = !task.isComplete;
+        targetTask=task;
       }
     }
-    setTask(newTasks);
+
+    if (targetTask.isComplete) {
+      axios
+      .patch(`https://task-list-api-c17.herokuapp.com/tasks/${taskId}/mark_complete`)
+      .then((response) => {
+        // targetTask.isComplete = targetTask.isComplete;
+        setTask(newTasks);
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    } else {
+      axios
+      .patch(`https://task-list-api-c17.herokuapp.com/tasks/${taskId}/mark_incomplete`)
+      .then((response) => {
+        // targetTask.isComplete = !targetTask.isComplete;
+        setTask(newTasks);
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
   };
 
-  const deleteTasks=(taskId)=>{
-    const newTasks = [];
-    for (const task of tasks) {
-      if (task.id !== taskId) {
-        newTasks.push(task);
-      }
-    }
-    setTask(newTasks);
+  const deleteTasks = (taskId) => {
+    axios
+    .delete(`https://task-list-api-c17.herokuapp.com/tasks/${taskId}`)
+    .then((response) => {
+      const newTasks = tasks.filter((task)=>task.id!==taskId);
+      setTask(newTasks);
+      console.log(response);
+    })
+    .catch((error)=>{
+      console.log(error);
+    });
+  };
+
+  const handleSubmission = (taskData) => {
+    axios
+    .post('https://task-list-api-c17.herokuapp.com/tasks', taskData)
+    .then((response) => {
+      console.log(response);
+      getTaskFromAPI();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   };
 
   return (
@@ -60,6 +90,7 @@ const App = () => {
       </header>
       <main>
         <div>
+          <TaskForm handleSubmission={handleSubmission}></TaskForm>
           <TaskList 
           tasks={tasks} 
           updateTasks={updateTasks}
